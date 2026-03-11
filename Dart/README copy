@@ -1,0 +1,90 @@
+# Beyond Templates: Dynamic Adaptation of Reasoning Demonstrations via Feasibility-Aware Exploration
+
+We introduce Dynamic Adaptation of Reasoning Trajectories (DART), a capability-aware adaptation framework designed to align expert-level reasoning data with the capacity of small language models (SLMs). Instead of statically mimicking expert trajectories from the elicitation template set, DART introduces a selective imitation mechanism that dynamically adapts supervision signals based on the model’s reasoning proficiency.
+
+The framework comprises three key components:
+1. **Step-wise adaptability estimation via solution simulation** (Section 3.1)
+2. **Imitation gap detection and adaptive path exploration** (Section 3.2)
+3. **Learning from outcome-aligned adapted trajectories** (Section 3.3)
+
+## Installation
+
+1. Clone the repository:
+   ```bash
+   git clone <repository-url>
+   cd dart
+   ```
+
+2. Install dependencies:
+   - Python 3.8+
+   - openai (for API client)
+   - tqdm
+   - sglang (for backend server)
+   - json
+   - re
+
+3. Set up the backend server (e.g., sglang):
+   ```bash
+   cd task
+   bash start-server.sh
+   ```
+
+## Data Preparation
+
+The project uses JSONL datasets such as `limo.jsonl` and `long_cot.jsonl`. To prepare the data for step-wise processing:
+
+```bash
+python data_process/data2step.py data/limo.jsonl data/limo_processed.jsonl
+python data_process/data2step.py data/long_cot.jsonl data/long_cot_processed.jsonl
+```
+
+This script splits the reasoning trajectories into cumulative steps, creating multiple entries per original sample.
+
+## Running the Pipeline
+
+### 1. Step-wise Adaptability Estimation via Solution Simulation
+
+This component simulates solutions to estimate the model's adaptability at each reasoning step.
+
+Run the judging pipeline in "build" mode to evaluate the model's performance on cumulative steps:
+
+```bash
+python dart_pipeline.py --input data/limo_processed.jsonl --output results/build_results.jsonl --prompt_mode build --repeat 4
+```
+
+This will process the data, simulate responses, and compute adaptability scores for each step.
+
+### 2. Imitation Gap Detection and Adaptive Path Exploration
+
+Detect gaps in imitation and explore adaptive paths.
+
+Switch to "explore" mode to continue reasoning from existing paths where gaps are detected:
+
+```bash
+python dart_pipeline.py --input data/limo_processed_need_explore.jsonl --output results/explore_results.jsonl --prompt_mode explore --repeat 10
+```
+
+This mode focuses on samples needing further exploration (`need_search=True`).
+
+### 3. Learning from Outcome-Aligned Adapted Trajectories
+
+Train the model on the adapted trajectories that align with outcomes.
+
+After collecting results from the above steps, use the processed data for training.
+
+We used the same training framework and scripts as referenced in the paper, consistent with limo, detailed implementation can be seen in the limo and llama-factory code repositories.
+
+## Scripts
+
+- `task/start-server.sh`: Starts the sglang server.
+- `task/begin.sh`: Starts the server and runs the worker.
+- `task/worker.sh`: Runs the main processing worker.
+- `task/explore_worker.sh`: Runs exploration-specific tasks.
+- Other scripts in `task/` for initialization and specific modes.
+
+## Configuration
+
+- Backend: Configurable via `backends/vllm_client.py` (supports vLLM, OpenAI-compatible APIs).
+- Models: Specify model name, temperature, max tokens in pipeline arguments.
+- Parallel processing: Adjust `max_workers` and `batch_size` for performance.
+
