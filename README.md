@@ -3,7 +3,7 @@ YongWu, Weihang Pan, Ke Li, Chen Binhui, Ping Li, Binbin Lin
 
 [![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 [![Python](https://img.shields.io/badge/python-3.8%2B-brightgreen.svg)](https://www.python.org/)
-[![Paper](https://img.shields.io/badge/paper-arXiv-red.svg)](https://arxiv.org/abs/xxxx.xxxxx)
+[![Paper](https://img.shields.io/badge/paper-arXiv-red.svg)](https://arxiv.org/abs/2505.20700)
 
 Official implementation of **BeyondTemplates** (DART: Dynamic Adaptation of Reasoning Trajectories), a novel framework for adapting expert-level reasoning demonstrations to diverse small language models (SLMs) through feasibility-aware selective imitation.
 
